@@ -12,5 +12,5 @@ NIXPACKS_NODE_VERSION = "20"
 startCommand = "caddy run --config /app/Caddyfile & cd server && node index.js"
 port = 80
 
-[build.extra_packages]
-- caddy
+[[build.extra_packages]]
+name = "caddy"
