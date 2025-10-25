@@ -1,13 +1,16 @@
 [build]
 builder = "nixpacks"
-buildCommand = "cd server && npm install"
-startCommand = "cd server && node index.js"
-installCommand = "cd server && npm install"
+buildCommand = "npm install && cd server && npm install"
+startCommand = "caddy run --config /app/Caddyfile & cd server && node index.js"
+installCommand = "npm install -g @caddyserver/linux-arm64 && npm install"
 
 [build.environment]
 NODE_ENV = "production"
 NIXPACKS_NODE_VERSION = "20"
 
 [deploy]
-startCommand = "cd server && node index.js"
-port = 3000
+startCommand = "caddy run --config /app/Caddyfile & cd server && node index.js"
+port = 80
+
+[build.extra_packages]
+- caddy

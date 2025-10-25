@@ -1,0 +1,3 @@
+simple-earning-system.railway.app {
+    reverse_proxy localhost:3000
+}
