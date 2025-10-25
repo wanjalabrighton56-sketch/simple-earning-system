@@ -30,19 +30,36 @@ const App = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    // Add a fallback timeout to prevent infinite loading
+    let isMounted = true;
+    
+    // Guaranteed fallback - if nothing happens in 5 seconds, go to registration
     const fallbackTimeout = setTimeout(() => {
-      console.log('Fallback timeout reached, redirecting to registration');
-      setAppState('registration');
-    }, 8000); // 8 second fallback
+      if (isMounted) {
+        console.warn('Auth check timeout - redirecting to registration');
+        setAppState('registration');
+      }
+    }, 5000);
 
-    checkAuthStatus().finally(() => {
-      clearTimeout(fallbackTimeout);
-    });
+    // Check auth status
+    checkAuthStatus()
+      .then(() => {
+        if (isMounted) clearTimeout(fallbackTimeout);
+      })
+      .catch((err) => {
+        console.error('Auth check error:', err);
+        if (isMounted) {
+          clearTimeout(fallbackTimeout);
+          setAppState('registration');
+        }
+      });
 
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!isMounted) return;
       clearTimeout(fallbackTimeout);
+      
       if (session?.user) {
+        setUserId(session.user.id);
         await loadUserProfile(session.user.id);
       } else {
         setAppState('registration');
@@ -50,6 +67,7 @@ const App = () => {
     });
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
       clearTimeout(fallbackTimeout);
     };

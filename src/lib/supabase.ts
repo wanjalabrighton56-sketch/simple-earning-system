@@ -11,12 +11,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false, // Disable URL detection to prevent issues
-    flowType: 'pkce'
-  },
-  global: {
-    headers: {
-      'X-Client-Info': 'supabase-js-web'
-    }
+    detectSessionInUrl: false,
+    storageKey: 'earning-system-auth'
   }
 });
