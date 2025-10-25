@@ -1,15 +1,17 @@
 [build]
 builder = "nixpacks"
 buildCommand = "cd server && npm install"
-startCommand = "cd server && node index.js"
+startCommand = "cd server && PORT=8080 node index.js"
 
 [build.environment]
 NODE_ENV = "production"
+NODE_VERSION = "20"
 NIXPACKS_NODE_VERSION = "20"
+PORT = "8080"
 
 [deploy]
-startCommand = "cd server && node index.js"
-port = 3000
+startCommand = "cd server && PORT=8080 node index.js"
+port = 8080
 
 [build.extra_packages]
-# No need for Caddy as Railway handles SSL termination
+# No extra packages needed
