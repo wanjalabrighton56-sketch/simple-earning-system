@@ -7,11 +7,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
+// ULTRA-SIMPLIFIED CONFIG - NO COMPLEX OPTIONS
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
-    storageKey: 'earning-system-auth'
+    autoRefreshToken: false,
+    detectSessionInUrl: false
   }
 });

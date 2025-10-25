@@ -10,6 +10,7 @@ import { InviteFriendsPage } from './pages/InviteFriendsPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { CashOutForm } from './components/CashOutForm';
 import { Footer } from './components/Footer';
+import { LoadingScreen } from './components/LoadingScreen';
 import {
   LayoutDashboard,
   FileText,
@@ -154,14 +155,7 @@ const App = () => {
   };
 
   if (appState === 'loading') {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-500 mx-auto mb-4"></div>
-          <p className="text-white text-xl font-semibold">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen onSkip={() => setAppState('registration')} />;
   }
 
   if (appState === 'registration') {
