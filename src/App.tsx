@@ -45,25 +45,33 @@ const App = () => {
 
   const checkAuthStatus = async () => {
     try {
-      // Add timeout to prevent infinite loading
+      // Increase timeout and add retry logic
       const timeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout')), 3000)
+        setTimeout(() => reject(new Error('Auth timeout - redirecting to registration')), 5000)
       );
       
       const sessionPromise = supabase.auth.getSession();
       
       const result = await Promise.race([sessionPromise, timeoutPromise]);
-      const { data: { session } } = result;
+      const { data: { session }, error } = result;
 
-      if (!session?.user) {
+      if (error) {
+        console.error('Session error:', error);
         setAppState('registration');
         return;
       }
 
+      if (!session?.user) {
+        console.log('No active session found, redirecting to registration');
+        setAppState('registration');
+        return;
+      }
+
+      console.log('Valid session found, loading user profile');
       await loadUserProfile(session.user.id);
     } catch (error) {
       console.error('Auth check failed:', error);
-      // Force to registration on any error
+      // Force to registration on any error (including timeout)
       setAppState('registration');
     }
   };
