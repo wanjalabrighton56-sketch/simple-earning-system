@@ -9,6 +9,7 @@ import { MyTeamPage } from './pages/MyTeamPage';
 import { InviteFriendsPage } from './pages/InviteFriendsPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { CashOutForm } from './components/CashOutForm';
+import { Footer } from './components/Footer';
 import {
   LayoutDashboard,
   FileText,
@@ -33,32 +34,47 @@ const App = () => {
 
   useEffect(() => {
     let isMounted = true;
+    let authCheckCompleted = false;
     
-    // Guaranteed fallback - if nothing happens in 5 seconds, go to registration
+    // AGGRESSIVE fallback - 3 seconds max
     const fallbackTimeout = setTimeout(() => {
-      if (isMounted) {
-        console.warn('Auth check timeout - redirecting to registration');
+      if (isMounted && !authCheckCompleted) {
+        console.warn('Auth timeout - forcing registration page');
         setAppState('registration');
+        authCheckCompleted = true;
       }
-    }, 5000);
+    }, 3000);
 
-    // Check auth status
-    checkAuthStatus()
-      .then(() => {
-        if (isMounted) clearTimeout(fallbackTimeout);
-      })
-      .catch((err) => {
-        console.error('Auth check error:', err);
+    // Quick auth check
+    const performAuthCheck = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!isMounted) return;
+        authCheckCompleted = true;
+        clearTimeout(fallbackTimeout);
+        
+        if (session?.user) {
+          setUserId(session.user.id);
+          await loadUserProfile(session.user.id);
+        } else {
+          setAppState('registration');
+        }
+      } catch (error) {
+        console.error('Auth error:', error);
         if (isMounted) {
+          authCheckCompleted = true;
           clearTimeout(fallbackTimeout);
           setAppState('registration');
         }
-      });
+      }
+    };
+
+    performAuthCheck();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!isMounted) return;
-      clearTimeout(fallbackTimeout);
       
       if (session?.user) {
         setUserId(session.user.id);
@@ -74,35 +90,6 @@ const App = () => {
       clearTimeout(fallbackTimeout);
     };
   }, []);
-
-  const checkAuthStatus = async () => {
-    try {
-      console.log('Starting auth check...');
-      
-      // First try to get session without timeout
-      const { data: { session }, error } = await supabase.auth.getSession();
-
-      if (error) {
-        console.error('Session error:', error);
-        setAppState('registration');
-        return;
-      }
-
-      if (!session?.user) {
-        console.log('No active session found, redirecting to registration');
-        setAppState('registration');
-        return;
-      }
-
-      console.log('Valid session found, loading user profile for:', session.user.id);
-      setUserId(session.user.id);
-      await loadUserProfile(session.user.id);
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      // On any error, go to registration
-      setAppState('registration');
-    }
-  };
 
   const loadUserProfile = async (uid: string) => {
     const { data, error } = await supabase
@@ -205,7 +192,7 @@ const App = () => {
           <div className="flex flex-col h-full">
             <div className="p-6 border-b border-slate-700">
               <div className="flex items-center justify-between">
-                <h1 className="text-xl font-bold text-white">Earning System</h1>
+                <h1 className="text-xl font-bold text-white">SmartPay</h1>
                 <button
                   onClick={() => setSidebarOpen(false)}
                   className="lg:hidden text-slate-400 hover:text-white"
@@ -307,6 +294,7 @@ const App = () => {
               userProfile={userProfile}
               onNavigate={setCurrentPage}
             />
+            <Footer />
           </div>
         </main>
       </div>

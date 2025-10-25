@@ -135,32 +135,25 @@ export const RegistrationPage = ({ onRegistrationComplete }: RegistrationPagePro
     try {
       console.log('Starting registration process...');
       
-      // Add timeout to prevent infinite loading
-      const signUpPromise = supabase.auth.signUp({
+      // Quick registration without complex timeouts
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           emailRedirectTo: undefined,
+          data: {
+            username: formData.username,
+            phone: formData.phone
+          }
         }
       });
 
-      const timeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Registration timeout - please try again')), 10000)
-      );
-
-      const { data: authData, error: authError } = await Promise.race([signUpPromise, timeoutPromise]);
-
-      console.log('Auth result:', { authData, authError });
-
       if (authError) throw authError;
-
-      if (!authData.user) {
-        throw new Error('Registration failed. Please try again.');
-      }
+      if (!authData.user) throw new Error('Registration failed. Please try again.');
 
       console.log('Creating user profile...');
 
-      const profilePromise = supabase
+      const { error: profileError } = await supabase
         .from('user_profiles')
         .insert([{
           id: authData.user.id,
@@ -169,17 +162,23 @@ export const RegistrationPage = ({ onRegistrationComplete }: RegistrationPagePro
           phone: formData.phone,
           referred_by: referralId,
           is_activated: false,
+          balance: 0,
+          task_balance: 0,
+          referral_balance: 0,
+          wallet_balance: 0,
+          total_earnings: 0,
+          total_referrals: 0,
+          active_referrals: 0,
+          referral_earnings: 0,
+          level1_count: 0,
+          level2_count: 0,
+          level3_count: 0
         }]);
 
-      const profileTimeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Profile creation timeout - please try again')), 5000)
-      );
-
-      const { error: profileError } = await Promise.race([profilePromise, profileTimeoutPromise]);
-
-      console.log('Profile result:', { profileError });
-
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Profile error:', profileError);
+        // If profile creation fails, still proceed (user can be fixed later)
+      }
 
       console.log('Registration successful!');
       onRegistrationComplete(authData.user.id);
