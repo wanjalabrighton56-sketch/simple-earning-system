@@ -3,11 +3,11 @@ builder = "nixpacks"
 buildCommand = "cd server && npm install"
 startCommand = "cd server && node index.js"
 installCommand = "cd server && npm install"
-nodeVersion = "20"
+
+[build.environment]
+NODE_ENV = "production"
+NIXPACKS_NODE_VERSION = "20"
 
 [deploy]
 startCommand = "cd server && node index.js"
 port = 3000
-
-[build.environment]
-NODE_ENV = "production"
