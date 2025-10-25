@@ -7,11 +7,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-// ULTRA-SIMPLIFIED CONFIG - NO COMPLEX OPTIONS
+// PRODUCTION-READY CONFIG WITH SESSION PERSISTENCE
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
-    autoRefreshToken: false,
-    detectSessionInUrl: false
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: window.localStorage,
+    storageKey: 'smartpay-auth-token',
+    flowType: 'implicit'
   }
 });
