@@ -6,6 +6,8 @@ import { PaymentPage } from './pages/PaymentPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { DailyTaskPage } from './pages/DailyTaskPage';
 import { MyTeamPage } from './pages/MyTeamPage';
+import { InviteFriendsPage } from './pages/InviteFriendsPage';
+import { HistoryPage } from './pages/HistoryPage';
 import { CashOutForm } from './components/CashOutForm';
 import {
   LayoutDashboard,
@@ -355,9 +357,11 @@ const PageContent = ({
     case 'My Team':
       return <MyTeamPage userProfile={userProfile} userId={userProfile.id!} />;
     case 'Invite Friends':
-      return <MyTeamPage userProfile={userProfile} userId={userProfile.id!} />;
+      return <InviteFriendsPage userProfile={userProfile} />;
     case 'Cash Out':
       return <CashOutForm userProfile={userProfile} />;
+    case 'History':
+      return <HistoryPage userProfile={userProfile} />;
     default:
       return (
         <div className="text-center py-12">

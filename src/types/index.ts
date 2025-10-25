@@ -9,7 +9,11 @@ export interface UserProfile {
   balance: number;
   task_balance: number;
   referral_balance: number;
+  wallet_balance: number;
   total_earnings: number;
+  total_referrals: number;
+  active_referrals: number;
+  referral_earnings: number;
   level1_count: number;
   level2_count: number;
   level3_count: number;
