@@ -165,6 +165,29 @@ app.get('/api/status/:externalRef', (req, res) => {
   }
 });
 
+app.get('/', (req, res) => {
+  res.json({
+    status: 'Server is running',
+    version: '1.0.0',
+    routes: {
+      payment: '/api/pay',
+      callback: '/api/callback',
+      status: '/api/status/:externalRef'
+    }
+  });
+});
+
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
+// Error Handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
 app.listen(PORT, () => {
   console.log(`Payment server running on port ${PORT}`);
   console.log('Ready to process activation payments');
