@@ -1,3 +1,20 @@
-simple-earning-system.railway.app {
+{
+    # Global options
+    auto_https disable_redirects
+    debug
+}
+
+http://simple-earning-system.railway.app {
+    # Handle HTTP traffic
+    redir https://{host}{uri} permanent
+}
+
+https://simple-earning-system.railway.app {
+    # Handle HTTPS traffic
     reverse_proxy localhost:3000
+    
+    # Disable TLS verification since Railway handles SSL termination
+    tls internal {
+        protocols tls1.2 tls1.3
+    }
 }

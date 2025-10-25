@@ -1,16 +1,15 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm install && cd server && npm install"
-startCommand = "caddy run --config /app/Caddyfile & cd server && node index.js"
-installCommand = "npm install -g @caddyserver/linux-arm64 && npm install"
+buildCommand = "cd server && npm install"
+startCommand = "cd server && node index.js"
 
 [build.environment]
 NODE_ENV = "production"
 NIXPACKS_NODE_VERSION = "20"
 
 [deploy]
-startCommand = "caddy run --config /app/Caddyfile & cd server && node index.js"
-port = 80
+startCommand = "cd server && node index.js"
+port = 3000
 
-[[build.extra_packages]]
-name = "caddy"
+[build.extra_packages]
+# No need for Caddy as Railway handles SSL termination
