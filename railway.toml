@@ -1,0 +1,11 @@
+[build]
+builder = "nixpacks"
+buildCommand = "cd server && npm install"
+startCommand = "cd server && npm start"
+installCommand = "cd server && npm install"
+
+[deploy]
+startCommand = "node server/index.js"
+
+[build.environment]
+NODE_ENV = "production"
