@@ -30,9 +30,18 @@ const App = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    checkAuthStatus();
+    // Add a fallback timeout to prevent infinite loading
+    const fallbackTimeout = setTimeout(() => {
+      console.log('Fallback timeout reached, redirecting to registration');
+      setAppState('registration');
+    }, 8000); // 8 second fallback
+
+    checkAuthStatus().finally(() => {
+      clearTimeout(fallbackTimeout);
+    });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      clearTimeout(fallbackTimeout);
       if (session?.user) {
         await loadUserProfile(session.user.id);
       } else {
@@ -40,20 +49,18 @@ const App = () => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(fallbackTimeout);
+    };
   }, []);
 
   const checkAuthStatus = async () => {
     try {
-      // Increase timeout and add retry logic
-      const timeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Auth timeout - redirecting to registration')), 5000)
-      );
+      console.log('Starting auth check...');
       
-      const sessionPromise = supabase.auth.getSession();
-      
-      const result = await Promise.race([sessionPromise, timeoutPromise]);
-      const { data: { session }, error } = result;
+      // First try to get session without timeout
+      const { data: { session }, error } = await supabase.auth.getSession();
 
       if (error) {
         console.error('Session error:', error);
@@ -67,11 +74,12 @@ const App = () => {
         return;
       }
 
-      console.log('Valid session found, loading user profile');
+      console.log('Valid session found, loading user profile for:', session.user.id);
+      setUserId(session.user.id);
       await loadUserProfile(session.user.id);
     } catch (error) {
       console.error('Auth check failed:', error);
-      // Force to registration on any error (including timeout)
+      // On any error, go to registration
       setAppState('registration');
     }
   };
