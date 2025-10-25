@@ -89,7 +89,7 @@ export const PaymentPage = ({ userId, onPaymentComplete }: PaymentPageProps) => 
 
       if (insertError) throw insertError;
 
-      const response = await fetch('/api/pay', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/pay`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
