@@ -169,11 +169,22 @@ app.get('/', (req, res) => {
   res.json({
     status: 'Server is running',
     version: '1.0.0',
+    timestamp: new Date().toISOString(),
     routes: {
       payment: '/api/pay',
       callback: '/api/callback',
-      status: '/api/status/:externalRef'
+      status: '/api/status/:externalRef',
+      health: '/health'
     }
+  });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
   });
 });
 
