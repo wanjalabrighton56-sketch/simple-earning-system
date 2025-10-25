@@ -3,11 +3,13 @@ import { supabase } from './lib/supabase';
 import { UserProfile } from './types';
 import { RegistrationPage } from './pages/RegistrationPage';
 import { PaymentPage } from './pages/PaymentPage';
-import { DashboardPage } from './pages/DashboardPage';
+import { EnhancedDashboardPage } from './pages/EnhancedDashboardPage';
 import { DailyTaskPage } from './pages/DailyTaskPage';
 import { MyTeamPage } from './pages/MyTeamPage';
 import { InviteFriendsPage } from './pages/InviteFriendsPage';
 import { HistoryPage } from './pages/HistoryPage';
+import { MarketingHubPage } from './pages/MarketingHubPage';
+import { TrainingHubPage } from './pages/TrainingHubPage';
 import { CashOutForm } from './components/CashOutForm';
 import { Footer } from './components/Footer';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -20,11 +22,13 @@ import {
   History,
   LogOut,
   Menu,
-  X
+  X,
+  Megaphone,
+  GraduationCap
 } from 'lucide-react';
 
 type AppState = 'loading' | 'registration' | 'payment' | 'dashboard';
-type Page = 'Dashboard' | 'Daily Task' | 'My Team' | 'Invite Friends' | 'Cash Out' | 'History';
+type Page = 'Dashboard' | 'Daily Task' | 'My Team' | 'Invite Friends' | 'Cash Out' | 'History' | 'Marketing Hub' | 'Training Hub';
 
 const App = () => {
   const [appState, setAppState] = useState<AppState>('loading');
@@ -255,6 +259,24 @@ const App = () => {
                   setSidebarOpen(false);
                 }}
               />
+              <NavItem
+                icon={<Megaphone />}
+                label="Marketing Hub"
+                active={currentPage === 'Marketing Hub'}
+                onClick={() => {
+                  setCurrentPage('Marketing Hub');
+                  setSidebarOpen(false);
+                }}
+              />
+              <NavItem
+                icon={<GraduationCap />}
+                label="Training Hub"
+                active={currentPage === 'Training Hub'}
+                onClick={() => {
+                  setCurrentPage('Training Hub');
+                  setSidebarOpen(false);
+                }}
+              />
             </nav>
 
             <div className="p-4 border-t border-slate-700">
@@ -333,7 +355,7 @@ const PageContent = ({
 }) => {
   switch (page) {
     case 'Dashboard':
-      return <DashboardPage userProfile={userProfile} onNavigate={onNavigate} />;
+      return <EnhancedDashboardPage userProfile={userProfile} onNavigate={onNavigate} />;
     case 'Daily Task':
       return <DailyTaskPage userId={userProfile.id!} />;
     case 'My Team':
@@ -344,6 +366,10 @@ const PageContent = ({
       return <CashOutForm userProfile={userProfile} />;
     case 'History':
       return <HistoryPage userProfile={userProfile} />;
+    case 'Marketing Hub':
+      return <MarketingHubPage />;
+    case 'Training Hub':
+      return <TrainingHubPage />;
     default:
       return (
         <div className="text-center py-12">
