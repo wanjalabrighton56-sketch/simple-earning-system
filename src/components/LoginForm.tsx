@@ -37,6 +37,7 @@ export const LoginForm = ({ onLoginComplete, onSwitchToRegister }: LoginFormProp
       }
 
       console.log('🔐 LOGIN FORM: Success! User ID:', authData.user.id);
+      console.log('🔐 LOGIN FORM: Calling completion callback...');
       onLoginComplete(authData.user.id);
     } catch (err: any) {
       console.error('🔐 LOGIN FORM: Final error:', err);

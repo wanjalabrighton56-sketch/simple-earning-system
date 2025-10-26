@@ -40,33 +40,42 @@ const App = () => {
   useEffect(() => {
     let isMounted = true;
     let authCheckCompleted = false;
+    let subscription: any;
     
-    // AGGRESSIVE fallback - 3 seconds max
+    // ULTRA-FAST fallback - 2 seconds max
     const fallbackTimeout = setTimeout(() => {
       if (isMounted && !authCheckCompleted) {
-        console.warn('Auth timeout - forcing registration page');
+        console.warn('🚨 AUTH TIMEOUT - Redirecting to registration');
         setAppState('registration');
         authCheckCompleted = true;
       }
-    }, 3000);
+    }, 2000);
 
-    // Quick auth check
+    // Immediate auth check
     const performAuthCheck = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        console.log('🔍 CHECKING EXISTING SESSION...');
+        const { data: { session }, error } = await supabase.auth.getSession();
         
         if (!isMounted) return;
         authCheckCompleted = true;
         clearTimeout(fallbackTimeout);
         
+        if (error) {
+          console.error('🚨 SESSION ERROR:', error);
+          throw error;
+        }
+        
         if (session?.user) {
+          console.log('✅ EXISTING SESSION FOUND:', session.user.id);
           setUserId(session.user.id);
           await loadUserProfile(session.user.id);
         } else {
+          console.log('❌ NO SESSION - Going to registration');
           setAppState('registration');
         }
       } catch (error) {
-        console.error('Auth error:', error);
+        console.error('🚨 AUTH CHECK ERROR:', error);
         if (isMounted) {
           authCheckCompleted = true;
           clearTimeout(fallbackTimeout);
@@ -75,23 +84,33 @@ const App = () => {
       }
     };
 
+    // Start auth check
     performAuthCheck();
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!isMounted) return;
-      
-      if (session?.user) {
-        setUserId(session.user.id);
-        await loadUserProfile(session.user.id);
-      } else {
-        setAppState('registration');
-      }
-    });
+    // Setup auth listener (ONLY for sign-out events)
+    const setupAuthListener = () => {
+      const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (!isMounted) return;
+        
+        console.log('🔄 AUTH STATE CHANGE:', event, session?.user?.id || 'NO USER');
+        
+        // Only handle sign-out events to avoid conflicts
+        if (event === 'SIGNED_OUT') {
+          console.log('👋 USER SIGNED OUT');
+          setAppState('registration');
+          setUserProfile(null);
+          setUserId(null);
+        }
+        // Form submissions will handle SIGNED_IN events directly
+      });
+      subscription = data.subscription;
+    };
+
+    setupAuthListener();
 
     return () => {
       isMounted = false;
-      subscription.unsubscribe();
+      if (subscription) subscription.unsubscribe();
       clearTimeout(fallbackTimeout);
     };
   }, []);
@@ -141,8 +160,18 @@ const App = () => {
   };
 
   const handleRegistrationComplete = async (newUserId: string) => {
-    setUserId(newUserId);
-    await loadUserProfile(newUserId);
+    console.log('🎉 REGISTRATION/LOGIN COMPLETE:', newUserId);
+    
+    // Immediately set loading state to prevent UI issues
+    setAppState('loading');
+    
+    try {
+      setUserId(newUserId);
+      await loadUserProfile(newUserId);
+    } catch (error) {
+      console.error('🚨 PROFILE LOAD ERROR:', error);
+      setAppState('registration');
+    }
   };
 
   const handlePaymentComplete = async () => {

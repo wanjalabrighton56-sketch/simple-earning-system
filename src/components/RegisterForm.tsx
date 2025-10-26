@@ -148,7 +148,7 @@ export const RegisterForm = ({ onRegistrationComplete, onSwitchToLogin }: Regist
         console.error('📝 REGISTER FORM: Profile error:', profileError);
       }
 
-      console.log('📝 REGISTER FORM: Success! Redirecting...');
+      console.log('📝 REGISTER FORM: Success! Calling completion callback...');
       onRegistrationComplete(authData.user.id);
     } catch (err: any) {
       console.error('📝 REGISTER FORM: Final error:', err);

@@ -17,6 +17,7 @@ export interface UserProfile {
   level1_count: number;
   level2_count: number;
   level3_count: number;
+  expenses: number;
   created_at: string;
   updated_at: string;
 }
