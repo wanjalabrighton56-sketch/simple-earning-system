@@ -3,7 +3,7 @@ import { supabase } from './lib/supabase';
 import { UserProfile } from './types';
 import { RegistrationPage } from './pages/RegistrationPage';
 import { PaymentPage } from './pages/PaymentPage';
-import { UltraDashboardPage } from './pages/UltraDashboardPage';
+import { ProfessionalDashboard } from './pages/ProfessionalDashboard';
 import { DailyTaskPage } from './pages/DailyTaskPage';
 import { MyTeamPage } from './pages/MyTeamPage';
 import { InviteFriendsPage } from './pages/InviteFriendsPage';
@@ -384,7 +384,7 @@ const PageContent = ({
 }) => {
   switch (page) {
     case 'Dashboard':
-      return <UltraDashboardPage userProfile={userProfile} onNavigate={onNavigate} />;
+      return <ProfessionalDashboard userProfile={userProfile} onNavigate={onNavigate} />;
     case 'Daily Task':
       return <DailyTaskPage userId={userProfile.id!} />;
     case 'My Team':
