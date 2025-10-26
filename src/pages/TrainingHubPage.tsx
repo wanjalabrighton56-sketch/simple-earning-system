@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { 
   BookOpen, Video, CheckCircle, Lock, Play, Award,
-  Facebook, Instagram, MessageCircle, TrendingUp, Users, Target
+  Facebook, Instagram, MessageCircle, TrendingUp, Users, Target, ArrowRight
 } from 'lucide-react';
+import { CourseViewerPage } from './CourseViewerPage';
 
 const trainingModules = [
   {
@@ -165,7 +166,8 @@ const trainingModules = [
 ];
 
 export const TrainingHubPage = () => {
-  const [selectedModule, setSelectedModule] = useState<number | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<number | null>(null);
+  const [viewingLesson, setViewingLesson] = useState<{courseId: string, lessonId: string} | null>(null);
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
 
   const toggleLesson = (moduleId: number, lessonIndex: number) => {
