@@ -91,6 +91,7 @@ export const RegistrationPage = ({ onRegistrationComplete }: RegistrationPagePro
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setError('');
 
     if (!formData.email || !formData.password) {
@@ -101,65 +102,73 @@ export const RegistrationPage = ({ onRegistrationComplete }: RegistrationPagePro
     setLoading(true);
 
     try {
+      console.log('LOGIN: Starting sign-in process...');
+      
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: formData.email,
+        email: formData.email.trim(),
         password: formData.password,
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error('LOGIN: Auth error:', authError);
+        throw authError;
+      }
 
       if (!authData.user) {
         throw new Error('Login failed. Please try again.');
       }
 
+      console.log('LOGIN: Success! User ID:', authData.user.id);
       onRegistrationComplete(authData.user.id);
     } catch (err: any) {
+      console.error('LOGIN: Error:', err);
       setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setError('');
-
-    if (isLogin) {
-      return handleLogin(e);
-    }
 
     if (!validateForm()) return;
 
     setLoading(true);
 
     try {
-      console.log('Starting registration process...');
+      console.log('REGISTRATION: Starting registration process...');
       
       // Quick registration without complex timeouts
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
+        email: formData.email.trim(),
         password: formData.password,
         options: {
           emailRedirectTo: undefined,
           data: {
-            username: formData.username,
-            phone: formData.phone
+            username: formData.username.trim(),
+            phone: formData.phone.trim()
           }
         }
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error('REGISTRATION: Auth error:', authError);
+        throw authError;
+      }
       if (!authData.user) throw new Error('Registration failed. Please try again.');
 
-      console.log('Creating user profile...');
+      console.log('REGISTRATION: User created, ID:', authData.user.id);
+      console.log('REGISTRATION: Creating user profile...');
 
       const { error: profileError } = await supabase
         .from('user_profiles')
         .insert([{
           id: authData.user.id,
-          username: formData.username,
-          email: formData.email,
-          phone: formData.phone,
+          username: formData.username.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
           referred_by: referralId,
           is_activated: false,
           balance: 0,
@@ -176,14 +185,14 @@ export const RegistrationPage = ({ onRegistrationComplete }: RegistrationPagePro
         }]);
 
       if (profileError) {
-        console.error('Profile error:', profileError);
+        console.error('REGISTRATION: Profile error:', profileError);
         // If profile creation fails, still proceed (user can be fixed later)
       }
 
-      console.log('Registration successful!');
+      console.log('REGISTRATION: Success! Redirecting...');
       onRegistrationComplete(authData.user.id);
     } catch (err: any) {
-      console.error('Registration error:', err);
+      console.error('REGISTRATION: Error:', err);
       setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
@@ -223,7 +232,7 @@ export const RegistrationPage = ({ onRegistrationComplete }: RegistrationPagePro
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={isLogin ? handleLogin : handleRegistration} className="space-y-4">
             {!isLogin && (
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
